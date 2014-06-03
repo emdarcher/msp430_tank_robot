@@ -21,7 +21,7 @@ volatile unsigned char move_direction=0;
 void go_forwards(void);
 void go_reverse(void);
 void spin_right(void);
-void spin left(void);
+void spin_left(void);
 void skid_right(void);
 void skid_left(void);
 void stop_motors(void);

@@ -23,7 +23,9 @@ upload:
 	mspdebug rf2500 "prog main.elf"
 
 tilib-upload:
- 	mspdebug-new tilib "prog main.elf"
+
+	mspdebug-new tilib "prog main.elf"
 
 size:
+
 	msp430-size main.elf
