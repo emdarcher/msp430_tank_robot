@@ -60,8 +60,8 @@ void main(void) {
 	P1OUT = 0;
 	P1DIR |= ALL_MOTORS;
 	
-	//BCSCTL1 = CALBC1_1MHZ;          // Running at 1 MHz
-    //DCOCTL = CALDCO_1MHZ;
+	BCSCTL1 = CALBC1_1MHZ;          // Running at 1 MHz
+    DCOCTL = CALDCO_1MHZ;
 
 	//TACCR0 = 124;           // With the Timer using SMCLK div 8 (125 kHz), this
                               // value gives a frequency of 125000/(TACCR0+1) Hz.
