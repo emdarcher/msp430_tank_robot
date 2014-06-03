@@ -1,6 +1,6 @@
 #change to correct file
 #OBJECTS = main.o 
-OBJECTS = testcode1.c
+OBJECTS = testcode2.c
  
 CC = msp430-gcc
 #change to correct ic here
