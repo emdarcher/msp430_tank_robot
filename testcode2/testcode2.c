@@ -20,6 +20,8 @@
 volatile unsigned int number_milliseconds=0;
 volatile unsigned char move_direction=0;
 
+int i; //for "for" loops
+
 //	Function Prototypes/Definitions
 void go_forwards(void);
 void go_reverse(void);
@@ -73,7 +75,7 @@ void main(void) {
         
     //_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
 	
-	int i;
+	
 	//infinite loop
 	for(;;) {
 		go_forwards();
