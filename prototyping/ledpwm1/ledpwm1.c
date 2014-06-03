@@ -31,7 +31,10 @@ void main(void) {
 		
 	P1OUT = 0;
 	P1DIR |= ALL_LEDS;
-	P1SEL |= ALL_LEDS; //initialize the TA0.1 on led2 TA0.2 on led1
+	P1SEL |= (LED2 | LED1); //initialize the TA0.1 on led2,
+					//and TA0.2 on led1
+	P1SEL2 |= LED1;
+							//P1SEL2 is important here!
 	
 	BCSCTL1 = CALBC1_1MHZ;          // Running at 1 MHz
     DCOCTL = CALDCO_1MHZ;
