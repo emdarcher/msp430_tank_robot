@@ -1,4 +1,6 @@
 //main code
+//test code 2 for msp430 tank robot
+
 
 //	Header Files
 
@@ -12,6 +14,7 @@
 #define MOTOR_L_A BIT1
 #define MOTOR_L_B BIT2
 
+#define ALL_MOTORS ( MOTOR_L_A | MOTOR_L_B | MOTOR_R_A | MOTOR_R_B )
 
 //	Global Variables
 volatile unsigned int number_milliseconds=0;
@@ -37,6 +40,15 @@ void motor_r_rev(void);
 #define MOTOR_R_FWD	
 #define MOTOR_R_REV
 */
+
+void bad_delay_ms(unsigned int ms){
+	int j;
+	for (j=0;j<ms;j++){
+		//expects to be operating a 1MHz
+		__delay_cycles(1000);
+	}
+}
+
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
 	
@@ -44,15 +56,15 @@ void main(void) {
 		//remember to enable any pull-up/downs!
 	
 	P1OUT = 0;
-	P1DIR |= (MOTOR_L_A | MOTOR_L_B | MOTOR_R_A | MOTOR_R_B);
+	P1DIR |= ALL_MOTORS;
 	
 	//BCSCTL1 = CALBC1_1MHZ;          // Running at 1 MHz
     //DCOCTL = CALDCO_1MHZ;
 
 	//TACCR0 = 124;           // With the Timer using SMCLK div 8 (125 kHz), this
-                                                        // value gives a frequency of 125000/(TACCR0+1) Hz.
-                                                        // For TACCR0 = 144, that's 862 Hz.
-                                                        // at 14400 it is 8.7... Hz
+                              // value gives a frequency of 125000/(TACCR0+1) Hz.
+                              // For TACCR0 = 144, that's 862 Hz.
+                              // at 14400 it is 8.7... Hz
 				//i am getting it to 1kHz
 	
 	//TACCTL0 = CCIE;         // Enable interrupts for CCR0.
@@ -65,6 +77,11 @@ void main(void) {
 	//infinite loop
 	for(;;) {
 		go_forwards();
+		bad_delay_ms(1000);
+		skid_right();
+		bad_delay_ms(500);
+		
+		/*
 		for(i =0;i<10;i++){ 
 		__delay_cycles(100000); //really inefficient!
 		__delay_cycles(100000);	//just for a rough test though.
@@ -73,8 +90,9 @@ void main(void) {
 		__delay_cycles(100000);
 		__delay_cycles(100000);
 		__delay_cycles(100000);
-		}
-		go_reverse();
+		}*/
+		//go_reverse();
+		/*
 		for(i=0;i<10;i++){
 		__delay_cycles(100000);
 		__delay_cycles(100000);
@@ -83,7 +101,7 @@ void main(void) {
 		__delay_cycles(100000);
 		__delay_cycles(100000);
 		__delay_cycles(100000);
-		}
+		}*/
 	}
 	
 }
@@ -91,7 +109,8 @@ void main(void) {
 //	Functions
 
 void stop_motors(void){
-	P1OUT &= ~(MOTOR_L_A | MOTOR_L_B | MOTOR_R_A | MOTOR_R_B);
+	//P1OUT &= ~(MOTOR_L_A | MOTOR_L_B | MOTOR_R_A | MOTOR_R_B);
+	P1OUT &= ~ALL_MOTORS;
 }
 
 void motor_l_fwd(void){
@@ -122,8 +141,8 @@ void go_reverse(void){
 //	Interrupt Service Routines
 /*
 __attribute__((interrupt(TIMER0_A0_VECTOR))) //notice! for the 20pin chips:
-                                                                                        //had to change TIMERA0_VECTOR
-                                                                                        //to TIMER0_A0_VECTOR 
+                                             //had to change TIMERA0_VECTOR
+                                             //to TIMER0_A0_VECTOR 
 void CCR0_ISR(void){
         number_milliseconds++;
        
