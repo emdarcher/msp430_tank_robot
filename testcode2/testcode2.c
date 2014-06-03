@@ -83,27 +83,6 @@ void main(void) {
 		skid_right();
 		bad_delay_ms(500);
 		
-		/*
-		for(i =0;i<10;i++){ 
-		__delay_cycles(100000); //really inefficient!
-		__delay_cycles(100000);	//just for a rough test though.
-		__delay_cycles(100000); //but still really ugly
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		}*/
-		//go_reverse();
-		/*
-		for(i=0;i<10;i++){
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		__delay_cycles(100000);
-		}*/
 	}
 	
 }
