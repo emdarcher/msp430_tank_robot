@@ -138,6 +138,24 @@ void go_reverse(void){
 	P1OUT |= (MOTOR_L_B | MOTOR_R_B);
 	P1OUT &= ~(MOTOR_L_A | MOTOR_R_A);
 }
+
+void skid_left(void){
+	P1OUT |= (MOTOR_R_A);
+	P1OUT &= ~(MOTOR_L_A | MOTOR_L_B | MOTOR_R_B);
+}
+void skid_right(void){
+	P1OUT |= (MOTOR_L_A);
+	P1OUT &= ~(MOTOR_L_B | MOTOR_R_A | MOTOR_R_B);
+}
+void spin_left(void){
+	P1OUT |= (MOTOR_L_B | MOTOR_R_A);
+	P1OUT &= ~(MOTOR_L_A | MOTOR_R_B);
+}
+void spin_right(void){
+	P1OUT |= (MOTOR_L_A | MOTOR_R_B);
+	P1OUT &= ~(MOTOR_L_B | MOTOR_R_A);
+}
+
 //	Interrupt Service Routines
 /*
 __attribute__((interrupt(TIMER0_A0_VECTOR))) //notice! for the 20pin chips:
