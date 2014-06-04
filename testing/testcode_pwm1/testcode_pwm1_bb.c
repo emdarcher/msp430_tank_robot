@@ -81,27 +81,24 @@ void main(void) {
 	
 	//infinite loop
 	for(;;) {
-		int spindelay = 2000;
-		int fwddelay = 4000;
-		
-		go_forwards(1000); //100%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
+		/*go_forwards(1000); //100%
+		bad_delay_ms(2000);
+		skid_right(1000);
+		bad_delay_ms(1000);
 		go_forwards(750); //75%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
+		bad_delay_ms(2000);
+		skid_right(1000);
+		bad_delay_ms(1000);
 		go_forwards(500); //50%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
+		bad_delay_ms(2000);
+		skid_right(1000);
+		bad_delay_ms(1000);
 		go_forwards(250); //25%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
+		bad_delay_ms(2000);
+		skid_right(1000);
+		bad_delay_ms(1000);*/
 		
-		/*for (i = 0; i < 1000;i+=200){
+		for (i = 0; i < 1000;i+=200){
 			
 			//TACCR1 = i;
 			//TACCR2 = i;
@@ -110,7 +107,7 @@ void main(void) {
 			set_motor_speeds(i,i);
 			bad_delay_ms(2000);
 			//__delay_cycles(100000);
-		}*/
+		}
 	}
 	
 }
