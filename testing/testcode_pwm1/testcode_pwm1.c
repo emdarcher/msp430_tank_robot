@@ -6,7 +6,7 @@
 
 #include <msp430.h> //include msp430 stuff
 #include <stdlib.h>
-//#include <math.h>
+
 //	Preprocessor Definitions
 
 #define MOTOR_R_A BIT7
