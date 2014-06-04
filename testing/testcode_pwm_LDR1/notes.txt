@@ -1,0 +1,23 @@
+//notes
+
+
+LDR notes:
+
+in really high brightness (held up to lamp) ~0.15K ohm,
+in darkness (eyglass case) maxes out meter at above 2000K ohm,
+so we can just use that as a limit for the low brightness
+
+find resistor divider value
+
+sqrt((2000000 x 150)) = sqrt(300000000) = 17320.50808..
+
+so ~17.32K ohms would be perfect I guess
+
+after some testing a 33K ohm resistor worked well on my test circuit
+in indoor daytime conditions
+
+on my desk it goes to ADC value 790-850 in full light
+and to 200-150-60-0 covered by my hand and 0 when fully covered by something
+(my eyeglasses case)
+
+as for nighttime idk yet
