@@ -81,8 +81,8 @@ void main(void) {
 	
 	//infinite loop
 	for(;;) {
-		int spindelay = 2000;
-		int fwddelay = 4000;
+		int spindelay = 2000; //should be in a #define
+		int fwddelay = 4000;  //but was too lazy.
 		
 		go_forwards(1000); //100%
 		bad_delay_ms(fwddelay);
