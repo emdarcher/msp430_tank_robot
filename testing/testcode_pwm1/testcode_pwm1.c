@@ -158,6 +158,7 @@ if(lr < 2){ //just check to make sure lr value is valid 0 or 1
 			TACCR1 = outspeed;
 				break;
 		}*/
+		
 	}
 	else if ( speed <= 0 ){
 		outspeed = abs(speed);
