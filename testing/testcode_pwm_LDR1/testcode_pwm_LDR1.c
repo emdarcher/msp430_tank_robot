@@ -102,8 +102,9 @@ void main(void) {
 	//infinite loop
 	for(;;) {
 		
+		ADC_read_vals();
+		set_motor_speeds(analog_to_pwm(a0_val),analog_to_pwm(a1_val));
 		
-
 	}
 	
 }
@@ -259,7 +260,9 @@ void ADC_read_vals(void){
 	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
 	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
     ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
+	//original way, but a little less nice lookin'
 	//__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	
 	_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
 	
 	a0_val = analog_vals[1];
@@ -273,5 +276,10 @@ __attribute__((interrupt(ADC10_VECTOR)))
 void ADC10_ISR(void){
 	
 	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
-	_BIC_SR(LPM0_exit);
+	//
+	//
+	_BIC_SR(LPM0_bits); //following convention
+	
+	//simpler way:
+	//LPM0_EXIT;
 }
