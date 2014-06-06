@@ -9,8 +9,6 @@
 
 //	Preprocessor Definitions
 
-
-
 //motor control pins
 #define MOTOR_R_A BIT7
 #define MOTOR_R_B BIT6		//P1.6 has TA0.1 output
@@ -68,6 +66,10 @@ void TA_init(void);
 
 void ADC_init(void);
 
+void ADC_read_vals(void);
+
+int analog_to_pwm(unsigned int analog);
+
 void bad_delay_ms(unsigned int ms){
 	int j;
 	for (j=0;j<ms;j++){
@@ -91,42 +93,17 @@ void main(void) {
     DCOCTL = CALDCO_1MHZ;
 
 	TA_init();
-        
+    
+    ADC_init();
+    
     //_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
 	
 	
 	//infinite loop
 	for(;;) {
-		int spindelay = 2000; //should be in a #define
-		int fwddelay = 4000;  //but was too lazy.
 		
-		go_forwards(1000); //100%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
-		go_forwards(750); //75%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
-		go_forwards(500); //50%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
-		go_forwards(250); //25%
-		bad_delay_ms(fwddelay);
-		spin_right(1000);
-		bad_delay_ms(spindelay);
 		
-		/*for (i = 0; i < 1000;i+=200){
-			
-			//TACCR1 = i;
-			//TACCR2 = i;
-			//set_motor_speed(0,i);
-			//set_motor_speed(1,i);
-			set_motor_speeds(i,i);
-			bad_delay_ms(2000);
-			//__delay_cycles(100000);
-		}*/
+
 	}
 	
 }
@@ -146,50 +123,14 @@ void set_motor_speed(unsigned char lr, int speed){
 	//lr = 0 or 1 for left or right, respectively 
 	int outspeed;
 
-if(lr < 2){ //just check to make sure lr value is valid 0 or 1
-	
-	//if ( speed == 0 ){
-		/*switch (lr) {
-			
-			case 0:
-			P1OUT &= ~MOTOR_L_AB;
-				break;
-			case 1:
-			P1OUT &= ~MOTOR_R_AB;
-				break;
-		}*/
-	//}
-	/*else*/ if ( speed > 0 ){
+if(lr < 2){ //just check to make sure lr value is valid 0 or 1	
+	if ( speed > 0 ){
 		outspeed = PWM_TOP - speed;
-		
 		P1OUT |= motor_a_pins[lr];
-		/*switch (lr) {
-			
-			case 0:
-			P1OUT |= MOTOR_L_A;
-			TACCR2 = outspeed;
-				break;
-			case 1:
-			P1OUT |= MOTOR_R_A;
-			TACCR1 = outspeed;
-				break;
-		}*/
-		
 	}
 	else if ( speed <= 0 ){
 		outspeed = abs(speed);
-		
 		P1OUT &= ~(motor_a_pins[lr]);
-		/*switch (lr) {
-			
-			case 0:
-			P1OUT &= ~MOTOR_L_A;
-			TACCR2 = outspeed;
-				break;
-			case 1:
-			P1OUT &= ~MOTOR_R_A;
-			TACCR1 = outspeed;
-		}*/
 	}
 	
 	switch (lr){ //sets which PWM pin to set
@@ -200,14 +141,8 @@ if(lr < 2){ //just check to make sure lr value is valid 0 or 1
 		TACCR1 = outspeed;
 			break;
 	}
-	/*if(lr == 0){
-		TACCR2 = outspeed;
-	}
-	else if(lr == 1){
-		TACCR1 = outspeed;
-	}*/
-	
 }
+
 }
 
 void stop_motors(void){
@@ -275,6 +210,18 @@ void spin_right(int spd){
 	set_motor_speeds(spd,(-1*spd));
 }
 
+int analog_to_pwm(unsigned int analog){
+	
+	if( analog > 1000 ){
+		
+		return (analog - 23);
+		
+	} else {
+		return analog;
+	}
+	
+}
+
 void TA_init(void) {
 	TACCR0 = PWM_TOP;		// TACCR0 controls the PWM frequency
 	TACCR1 = 0;				// 0.0% duty cycle for PWMTop = 1000
@@ -288,35 +235,43 @@ void TA_init(void) {
 	
 }
 
-//from mspsci.blogspot.com ADC10 tutorial
-void ADC_init(void) {
-            // Use Vcc/Vss for Up/Low Refs, 16 x ADC10CLKs, turn on ADC
-    ADC10CTL0 = SREF_0 + ADC10SHT_2 + ADC10ON;
-            // A1 input, use ADC10CLK div 1, single channel mode  
-    ADC10CTL1 =  INCH_1 + SHS_0 + ADC10SSEL_0 + ADC10DIV_0 + CONSEQ_0;
-    ADC10AE0 = A1;      // Enable ADC input on P1.1
-    
-    //ADC10CTL0 |= ENC+ ADC10SC;     // Enable conversions.
-} // ADC_init
+void ADC_init(void){
+	
+	ADC10CTL1 = INCH_2 + CONSEQ_1;
+	// ADC10CTL1 control register 1, channel 2 highest conversion channel
+	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
+	ADC10CTL0 = ADC10SHT_1 + MSC + ADC10ON + ADC10IE + SREF_0;
+	// ADC10CTL0 control Register 0
+	// ADC10SHT_1 sample and hold time, 1 = 8 x ADC10CLK
+	// MSC multiple sample and conversions
+	// ADC10ON adc10 on
+	// ADC10IE adc10 interrupt enable
+	// SREF_0 use external V ref, so Vcc/Vss
+	ADC10DTC1 = 0x02;
+	// Data Transfer Control register, defines the number of transfers in each block, 2 in this case
+	ADC10AE0 |= (A0 | A1);
+	// ADC10 analog enable bits PP1.1 and P1.0 
+}
 
+void ADC_read_vals(void){
+	
+	ADC10CTL0 &= ~ENC; //disable conversion
+	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
+	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
+    ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
+	//__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
+	
+	a0_val = analog_vals[1];
+	a1_val = analog_vals[0];
+	
+}
 
 //	Interrupt Service Routines
-/*
-__attribute__((interrupt(TIMER0_A0_VECTOR))) //notice! for the 20pin chips:
-                                             //had to change TIMERA0_VECTOR
-                                             //to TIMER0_A0_VECTOR 
-void CCR0_ISR(void){
-        number_milliseconds++;
-       
-        if (number_milliseconds == 1000){
-			move_direction ^= 1; //toggle direction
-			number_milliseconds = 0;
-			
-			if (move_direction == 0){
-				go_forwards();
-			} else {
-				go_reverse();
-			}
-		}
+
+__attribute__((interrupt(ADC10_VECTOR)))
+void ADC10_ISR(void){
+	
+	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
+	_BIC_SR(LPM0_exit);
 }
-*/

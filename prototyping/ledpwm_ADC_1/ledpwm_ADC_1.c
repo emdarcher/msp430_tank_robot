@@ -1,7 +1,8 @@
 //main code
-//to test two ADC inputs and outputing corrsponding PWM
+//to test two ADC inputs and outputing corresponding PWM
 //to two LEDs
-
+//has some useful stuff from this site:
+// http://coder-tronics.com/msp430-adc-tutorial/
 
 //	Header Files
 
@@ -87,8 +88,8 @@ void main(void) {
 
 void set_pwms(void){
 	
-	TACCR1 = analog_to_pwm(a0_val);
-	TACCR2 = analog_to_pwm(a1_val);	
+	TACCR1 = analog_to_pwm(a1_val);
+	TACCR2 = analog_to_pwm(a0_val);	
 		
 }
 
@@ -141,7 +142,11 @@ void ADC_read_vals(void){
 	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
 	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
     ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
-	__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	//__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
+	//or just simply to this:
+	//LPM0;
+	
 	
 	a0_val = analog_vals[1];
 	a1_val = analog_vals[0];
@@ -159,6 +164,8 @@ __interrupt void ADC10_ISR(void)
 __attribute__((interrupt(ADC10_VECTOR)))
 void ADC10_ISR(void){
 	
-	__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
-	
+	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
+	//_BIC_SR_IRQ(LPM0_bits);
+	//or
+	LPM0_EXIT;
 }
