@@ -1,5 +1,5 @@
 //main code
-//test code for pwm and motors on msp430 tank robot
+//test code for pwm, LDRs, and motors on msp430 tank robot
 
 
 //	Header Files
@@ -9,20 +9,34 @@
 
 //	Preprocessor Definitions
 
+
+
+//motor control pins
 #define MOTOR_R_A BIT7
 #define MOTOR_R_B BIT6		//P1.6 has TA0.1 output
 
 #define MOTOR_L_A BIT3		//note changes here!
 #define MOTOR_L_B BIT4		//now on P1.4 for TA0.2 output
 
-#define MOTOR_L_AB ( MOTOR_L_A | MOTOR_L_B)
-#define MOTOR_R_AB ( MOTOR_R_A | MOTOR_R_B)
+#define MOTOR_L_AB ( MOTOR_L_A | MOTOR_L_B )
+#define MOTOR_R_AB ( MOTOR_R_A | MOTOR_R_B )
 
 #define MOTOR_LR_PWM ( MOTOR_L_B | MOTOR_R_B )
 
 #define ALL_MOTORS ( MOTOR_L_A | MOTOR_L_B | MOTOR_R_A | MOTOR_R_B )
 
+//analog input pins
+#define A0 BIT0
+#define A1 BIT1
+
+#define LDR_L A0 //more friendly names?
+#define LDR_R A1 //for the left and right LDRs
+
+
+//PWM stuff
 #define PWM_TOP 1000 //for PWM DIV so DCO/PWM_TOP
+
+
 
 //	Global Variables
 //volatile unsigned int number_milliseconds=0;
@@ -51,6 +65,8 @@ void set_motor_speed(unsigned char lr, int speed);
 void set_motor_speeds(int speed_left, int speed_right);
 
 void TA_init(void);
+
+void ADC_init(void);
 
 void bad_delay_ms(unsigned int ms){
 	int j;
@@ -271,6 +287,18 @@ void TA_init(void) {
 	TACCTL2 = OUTMOD_7;
 	
 }
+
+//from mspsci.blogspot.com ADC10 tutorial
+void ADC_init(void) {
+            // Use Vcc/Vss for Up/Low Refs, 16 x ADC10CLKs, turn on ADC
+    ADC10CTL0 = SREF_0 + ADC10SHT_2 + ADC10ON;
+            // A1 input, use ADC10CLK div 1, single channel mode  
+    ADC10CTL1 =  INCH_1 + SHS_0 + ADC10SSEL_0 + ADC10DIV_0 + CONSEQ_0;
+    ADC10AE0 = A1;      // Enable ADC input on P1.1
+    
+    //ADC10CTL0 |= ENC+ ADC10SC;     // Enable conversions.
+} // ADC_init
+
 
 //	Interrupt Service Routines
 /*

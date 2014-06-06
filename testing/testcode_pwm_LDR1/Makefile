@@ -1,6 +1,6 @@
 #change to correct file
 #OBJECTS = main.o 
-OBJECTS = testcode_pwm1_LDR1.c
+OBJECTS = testcode_pwm_LDR1.c
  
 CC = msp430-gcc
 #change to correct ic here
