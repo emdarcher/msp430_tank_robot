@@ -32,6 +32,10 @@ void TA_init(void);
 
 void ADC_init(void);
 
+void ADC_read_vals(void);
+
+int analog_to_pwm(unsigned int analog);
+
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
 	
@@ -54,9 +58,11 @@ void main(void) {
     
     TA_init();
 	
+	ADC_init();
+	
 	//infinite loop
 	for(;;) {
-		__delay_cycles(PWM_TOP*5);
+		/*__delay_cycles(PWM_TOP*5);
 		TACCR1 += dir1;
 		TACCR2 += dir2;
 		if (TACCR1 == PWM_TOP){
@@ -65,13 +71,36 @@ void main(void) {
 		} else if (TACCR1 == 0){
 			dir1 = 1;
 			dir2 = -1;
-		}
+		}*/
+		
+		ADC_read_vals();
+		
+		
 		
 	}
 	//return 0; //should never reach this	
 }
 
 //	Functions
+
+void set_pwms(void){
+	
+	TACCR1 = analog_to_pwm(a0_val);
+	TACCR2 = analog_to_pwm(a1_val);	
+		
+}
+
+int analog_to_pwm(unsigned int analog){
+	
+	if( analog > 1000 ){
+		
+		return (analog - 23);
+		
+	} else {
+		return analog;
+	}
+	
+}
 
 void TA_init(void) {
 	TACCR0 = PWM_TOP;		// TACCR0 controls the PWM frequency
@@ -91,8 +120,43 @@ void ADC_init(void){
 	ADC10CTL1 = INCH_2 + CONSEQ_1;
 	// ADC10CTL1 control register 1, channel 2 highest conversion channel
 	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
+	ADC10CTL0 = ADC10SHT_1 + MSC + ADC10ON + ADC10IE + SREF_0;
+	// ADC10CTL0 control Register 0
+	// ADC10SHT_1 sample and hold time, 1 = 8 x ADC10CLK
+	// MSC multiple sample and conversions
+	// ADC10ON adc10 on
+	// ADC10IE adc10 interrupt enable
+	// SREF_0 use external V ref, so Vcc/Vss
+	ADC10DTC1 = 0x02;
+	// Data Transfer Control register, defines the number of transfers in each block, 2 in this case
+	ADC10AE0 |= (A0 | A1);
+	// ADC10 analog enable bits PP1.1 and P1.0 
+}
+
+void ADC_read_vals(void){
+	
+	ADC10CTL0 &= ~ENC; //disable conversion
+	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
+	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
+    ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
+	__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	
+	a0_val = analog_vals[1];
+	a1_val = analog_vals[0];
 	
 }
 
 //	Interrupt Service Routines
 
+// ADC10 interrupt service routine
+/*#pragma vector=ADC10_VECTOR
+__interrupt void ADC10_ISR(void)
+{
+  __bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
+}*/
+__attribute__(interrupt(ADC10_VECTOR))
+void ADC10_ISR(void){
+	
+	__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
+	
+}
