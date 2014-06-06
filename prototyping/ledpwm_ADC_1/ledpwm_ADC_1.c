@@ -36,6 +36,8 @@ void ADC_read_vals(void);
 
 int analog_to_pwm(unsigned int analog);
 
+void set_pwms(void);
+
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
 	
@@ -74,7 +76,7 @@ void main(void) {
 		}*/
 		
 		ADC_read_vals();
-		
+		set_pwms();
 		
 		
 	}
@@ -154,7 +156,7 @@ __interrupt void ADC10_ISR(void)
 {
   __bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
 }*/
-__attribute__(interrupt(ADC10_VECTOR))
+__attribute__((interrupt(ADC10_VECTOR)))
 void ADC10_ISR(void){
 	
 	__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
