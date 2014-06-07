@@ -40,6 +40,11 @@
 //volatile unsigned int number_milliseconds=0;
 //volatile unsigned char move_direction=0;
 
+
+unsigned int analog_vals[2];
+unsigned int a0_val = 0;
+unsigned int a1_val = 0;
+
 const unsigned char motor_a_pins[] = {MOTOR_L_A, MOTOR_R_A};
 //const unsigned char motor_ab_pins[] = {MOTOR_L_AB, MOTOR_R_AB};
 
@@ -278,7 +283,7 @@ void ADC10_ISR(void){
 	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
 	//
 	//
-	_BIC_SR(LPM0_bits); //following convention
+	_BIC_SR_IRQ(LPM0_bits); //following convention
 	
 	//simpler way:
 	//LPM0_EXIT;
