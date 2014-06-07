@@ -78,7 +78,7 @@ void main(void) {
 		
 		ADC_read_vals();
 		set_pwms();
-		
+		//TACCR1 = 5;
 		
 	}
 	//return 0; //should never reach this	
@@ -96,9 +96,7 @@ void set_pwms(void){
 int analog_to_pwm(unsigned int analog){
 	
 	if( analog > 1000 ){
-		
 		return (analog - 23);
-		
 	} else {
 		return analog;
 	}
@@ -107,13 +105,13 @@ int analog_to_pwm(unsigned int analog){
 
 void TA_init(void) {
 	TACCR0 = PWM_TOP;		// TACCR0 controls the PWM frequency
-	TACCR1 = 1;				// LED2 starts at 1% duty cycle for PWMTop = 1000
+	TACCR1 = 0;				// LED2 starts at 0% duty cycle for PWMTop = 1000
 	TACTL = TASSEL_2 + ID_0 + MC_1;	// SMCLK, div 1, Up Mode
 									// No interrupts needed!
 	TACCTL1 = OUTMOD_7;		// Reset/Set: Sets at TACCR0, resets at TACCR1
 	
 	//stuff for TA0.2
-	TACCR2 = PWM_TOP; //led1 100% duty cycle
+	TACCR2 = 0; //led1 0% duty cycle
 	TACCTL2 = OUTMOD_7;
 	
 }
@@ -162,16 +160,11 @@ void ADC_read_vals(void){
 //	Interrupt Service Routines
 
 // ADC10 interrupt service routine
-/*#pragma vector=ADC10_VECTOR
-__interrupt void ADC10_ISR(void)
-{
-  __bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
-}*/
 __attribute__((interrupt(ADC10_VECTOR)))
 void ADC10_ISR(void){
 	//again lower level way
 	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
-	//_BIC_SR_IRQ(LPM0_bits); //to follow convention
+	_BIC_SR_IRQ(LPM0_bits); //to follow convention
 	//or simply
-	LPM0_EXIT;
+	//LPM0_EXIT;
 }
