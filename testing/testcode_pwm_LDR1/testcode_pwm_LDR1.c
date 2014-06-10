@@ -1,6 +1,7 @@
 //main code
 //test code for pwm, LDRs, and motors on msp430 tank robot
-
+//the output from the LDRs adjusts the opposite motor's speed
+//so it turns, but not the best method though.
 
 //	Header Files
 
