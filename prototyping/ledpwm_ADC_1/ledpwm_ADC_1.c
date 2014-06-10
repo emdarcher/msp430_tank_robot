@@ -23,7 +23,7 @@
 
 //	Global Variables
 
-unsigned int analog_vals[2];
+unsigned int analog_vals[2] = {0,0};
 unsigned int a0_val = 0;
 unsigned int a1_val = 0;
 
@@ -42,9 +42,9 @@ void set_pwms(void);
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
 	
-	int dir1=1;		// Direction for PWM duty cycle change. A +1
+	//int dir1=1;		// Direction for PWM duty cycle change. A +1
 					// value increases, a -1 value decreases
-	int dir2=-1;    //start direction for number 2
+	//int dir2=-1;    //start direction for number 2
 	
 	//initialization stuff here
 		//remember to enable any pull-up/downs!
@@ -88,9 +88,10 @@ void main(void) {
 
 void set_pwms(void){
 	
-	TACCR1 = analog_to_pwm(a1_val);
-	TACCR2 = analog_to_pwm(a0_val);	
-		
+	TACCR1 = analog_to_pwm(a0_val); //switched these after fix
+	TACCR2 = analog_to_pwm(a1_val);	
+		//TACCR1 = a1_val;
+        //TACCR2 = a0_val;
 }
 
 int analog_to_pwm(unsigned int analog){
@@ -118,8 +119,9 @@ void TA_init(void) {
 
 void ADC_init(void){
 	
-	ADC10CTL1 = INCH_2 + CONSEQ_1;
-	// ADC10CTL1 control register 1, channel 2 highest conversion channel
+	ADC10CTL1 = INCH_1 + CONSEQ_1;
+	// ADC10CTL1 control register 1, channel 1 highest conversion channel
+    // make sure INCH_x is correct!!
 	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
 	ADC10CTL0 = ADC10SHT_1 + MSC + ADC10ON + ADC10IE + SREF_0;
 	// ADC10CTL0 control Register 0
@@ -138,7 +140,7 @@ void ADC_read_vals(void){
 	
 	ADC10CTL0 &= ~ENC; //disable conversion
 	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
-	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
+	ADC10SA = (unsigned int)&analog_vals[0];	// Copies data in ADC10SA to unsigned int adc array
     ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
 	
 	//lower level way
@@ -151,7 +153,7 @@ void ADC_read_vals(void){
 	//LPM0; //actually doesn't work b/c it doesn't have the interrupt enable
 										// " + GIE"
 										//it is _BIS_SR(LPM0_bits); only
-	
+	//__delay_cycles(100);
 	a0_val = analog_vals[1];
 	a1_val = analog_vals[0];
 	

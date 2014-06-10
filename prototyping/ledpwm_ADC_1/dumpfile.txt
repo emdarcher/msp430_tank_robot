@@ -1,0 +1,269 @@
+
+main.elf:     file format elf32-msp430
+
+
+Disassembly of section .text:
+
+0000fc00 <__init_stack>:
+    fc00:	31 40 00 03 	mov	#768,	r1	;#0x0300
+
+0000fc04 <__low_level_init>:
+    fc04:	15 42 20 01 	mov	&0x0120,r5	
+    fc08:	75 f3       	and.b	#-1,	r5	;r3 As==11
+    fc0a:	35 d0 08 5a 	bis	#23048,	r5	;#0x5a08
+
+0000fc0e <__do_copy_data>:
+    fc0e:	3f 40 00 00 	mov	#0,	r15	;#0x0000
+    fc12:	0f 93       	tst	r15		
+    fc14:	07 24       	jz	$+16     	;abs 0xfc24
+    fc16:	82 45 20 01 	mov	r5,	&0x0120	
+    fc1a:	2f 83       	decd	r15		
+    fc1c:	9f 4f 1c fd 	mov	-740(r15),512(r15);0xfd1c(r15), 0x0200(r15)
+    fc20:	00 02 
+    fc22:	f9 23       	jnz	$-12     	;abs 0xfc16
+
+0000fc24 <__do_clear_bss>:
+    fc24:	3f 40 08 00 	mov	#8,	r15	;#0x0008
+    fc28:	0f 93       	tst	r15		
+    fc2a:	06 24       	jz	$+14     	;abs 0xfc38
+    fc2c:	82 45 20 01 	mov	r5,	&0x0120	
+    fc30:	1f 83       	dec	r15		
+    fc32:	cf 43 00 02 	mov.b	#0,	512(r15);r3 As==00, 0x0200(r15)
+    fc36:	fa 23       	jnz	$-10     	;abs 0xfc2c
+
+0000fc38 <main>:
+int analog_to_pwm(unsigned int analog);
+
+void set_pwms(void);
+
+void main(void) {
+	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
+    fc38:	b2 40 80 5a 	mov	#23168,	&0x0120	;#0x5a80
+    fc3c:	20 01 
+	//int dir2=-1;    //start direction for number 2
+	
+	//initialization stuff here
+		//remember to enable any pull-up/downs!
+		
+	P1OUT = 0;
+    fc3e:	c2 43 21 00 	mov.b	#0,	&0x0021	;r3 As==00
+	P1DIR |= ALL_LEDS;
+    fc42:	f2 d0 50 00 	bis.b	#80,	&0x0022	;#0x0050
+    fc46:	22 00 
+	P1SEL |= (LED2 | LED1); //initialize the TA0.1 on led2,
+    fc48:	f2 d0 50 00 	bis.b	#80,	&0x0026	;#0x0050
+    fc4c:	26 00 
+					//and TA0.2 on led1
+	P1SEL2 |= LED1;
+    fc4e:	f2 d0 10 00 	bis.b	#16,	&0x0041	;#0x0010
+    fc52:	41 00 
+							//P1SEL2 is important here!
+	
+	BCSCTL1 = CALBC1_1MHZ;          // Running at 1 MHz
+    fc54:	d2 42 ff 10 	mov.b	&0x10ff,&0x0057	
+    fc58:	57 00 
+    DCOCTL = CALDCO_1MHZ;
+    fc5a:	d2 42 fe 10 	mov.b	&0x10fe,&0x0056	
+    fc5e:	56 00 
+    
+    TA_init();
+    fc60:	b0 12 ae fc 	call	#0xfcae	
+	
+	ADC_init();
+    fc64:	b0 12 d0 fc 	call	#0xfcd0	
+		} else if (TACCR1 == 0){
+			dir1 = 1;
+			dir2 = -1;
+		}*/
+		
+		ADC_read_vals();
+    fc68:	b0 12 e8 fc 	call	#0xfce8	
+		set_pwms();
+    fc6c:	b0 12 7c fc 	call	#0xfc7c	
+    fc70:	fb 3f       	jmp	$-8      	;abs 0xfc68
+
+0000fc72 <__stop_progExec__>:
+    fc72:	32 d0 f0 00 	bis	#240,	r2	;#0x00f0
+    fc76:	fd 3f       	jmp	$-4      	;abs 0xfc72
+
+0000fc78 <__ctors_end>:
+    fc78:	30 40 1a fd 	br	#0xfd1a	
+
+0000fc7c <set_pwms>:
+
+//	Functions
+
+void set_pwms(void){
+	
+	TACCR1 = analog_to_pwm(a1_val);
+    fc7c:	1f 42 02 02 	mov	&0x0202,r15	
+        //TACCR2 = a0_val;
+}
+
+int analog_to_pwm(unsigned int analog){
+	
+	if( analog > 1000 ){
+    fc80:	3f 90 e9 03 	cmp	#1001,	r15	;#0x03e9
+    fc84:	02 28       	jnc	$+6      	;abs 0xfc8a
+		return (analog - 23);
+    fc86:	3f 50 e9 ff 	add	#-23,	r15	;#0xffe9
+
+//	Functions
+
+void set_pwms(void){
+	
+	TACCR1 = analog_to_pwm(a1_val);
+    fc8a:	82 4f 74 01 	mov	r15,	&0x0174	
+	TACCR2 = analog_to_pwm(a0_val);	
+    fc8e:	1f 42 00 02 	mov	&0x0200,r15	
+        //TACCR2 = a0_val;
+}
+
+int analog_to_pwm(unsigned int analog){
+	
+	if( analog > 1000 ){
+    fc92:	3f 90 e9 03 	cmp	#1001,	r15	;#0x03e9
+    fc96:	02 28       	jnc	$+6      	;abs 0xfc9c
+		return (analog - 23);
+    fc98:	3f 50 e9 ff 	add	#-23,	r15	;#0xffe9
+//	Functions
+
+void set_pwms(void){
+	
+	TACCR1 = analog_to_pwm(a1_val);
+	TACCR2 = analog_to_pwm(a0_val);	
+    fc9c:	82 4f 76 01 	mov	r15,	&0x0176	
+		//TACCR1 = a1_val;
+        //TACCR2 = a0_val;
+}
+    fca0:	30 41       	ret			
+
+0000fca2 <analog_to_pwm>:
+
+int analog_to_pwm(unsigned int analog){
+	
+	if( analog > 1000 ){
+    fca2:	3f 90 e9 03 	cmp	#1001,	r15	;#0x03e9
+    fca6:	02 28       	jnc	$+6      	;abs 0xfcac
+		return (analog - 23);
+    fca8:	3f 50 e9 ff 	add	#-23,	r15	;#0xffe9
+	} else {
+		return analog;
+	}
+	
+}
+    fcac:	30 41       	ret			
+
+0000fcae <TA_init>:
+
+void TA_init(void) {
+	TACCR0 = PWM_TOP;		// TACCR0 controls the PWM frequency
+    fcae:	b2 40 e8 03 	mov	#1000,	&0x0172	;#0x03e8
+    fcb2:	72 01 
+	TACCR1 = 0;				// LED2 starts at 0% duty cycle for PWMTop = 1000
+    fcb4:	82 43 74 01 	mov	#0,	&0x0174	;r3 As==00
+	TACTL = TASSEL_2 + ID_0 + MC_1;	// SMCLK, div 1, Up Mode
+    fcb8:	b2 40 10 02 	mov	#528,	&0x0160	;#0x0210
+    fcbc:	60 01 
+									// No interrupts needed!
+	TACCTL1 = OUTMOD_7;		// Reset/Set: Sets at TACCR0, resets at TACCR1
+    fcbe:	b2 40 e0 00 	mov	#224,	&0x0164	;#0x00e0
+    fcc2:	64 01 
+	
+	//stuff for TA0.2
+	TACCR2 = 0; //led1 0% duty cycle
+    fcc4:	82 43 76 01 	mov	#0,	&0x0176	;r3 As==00
+	TACCTL2 = OUTMOD_7;
+    fcc8:	b2 40 e0 00 	mov	#224,	&0x0166	;#0x00e0
+    fccc:	66 01 
+	
+}
+    fcce:	30 41       	ret			
+
+0000fcd0 <ADC_init>:
+
+void ADC_init(void){
+	
+	ADC10CTL1 = INCH_2 + CONSEQ_1;
+    fcd0:	b2 40 02 20 	mov	#8194,	&0x01b2	;#0x2002
+    fcd4:	b2 01 
+	// ADC10CTL1 control register 1, channel 2 highest conversion channel
+	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
+	ADC10CTL0 = ADC10SHT_1 + MSC + ADC10ON + ADC10IE + SREF_0;
+    fcd6:	b2 40 98 08 	mov	#2200,	&0x01b0	;#0x0898
+    fcda:	b0 01 
+	// ADC10SHT_1 sample and hold time, 1 = 8 x ADC10CLK
+	// MSC multiple sample and conversions
+	// ADC10ON adc10 on
+	// ADC10IE adc10 interrupt enable
+	// SREF_0 use external V ref, so Vcc/Vss
+	ADC10DTC1 = 0x02;
+    fcdc:	e2 43 49 00 	mov.b	#2,	&0x0049	;r3 As==10
+	// Data Transfer Control register, defines the number of transfers in each block, 2 in this case
+	ADC10AE0 |= (A0 | A1);
+    fce0:	f2 d0 03 00 	bis.b	#3,	&0x004a	;#0x0003
+    fce4:	4a 00 
+	// ADC10 analog enable bits PP1.1 and P1.0 
+}
+    fce6:	30 41       	ret			
+
+0000fce8 <ADC_read_vals>:
+
+void ADC_read_vals(void){
+	
+	ADC10CTL0 &= ~ENC; //disable conversion
+    fce8:	b2 f0 fd ff 	and	#-3,	&0x01b0	;#0xfffd
+    fcec:	b0 01 
+	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
+    fcee:	92 b3 b2 01 	bit	#1,	&0x01b2	;r3 As==01
+    fcf2:	fd 23       	jnz	$-4      	;abs 0xfcee
+	ADC10SA = (unsigned int)analog_vals;	// Copies data in ADC10SA to unsigned int adc array
+    fcf4:	b2 40 04 02 	mov	#516,	&0x01bc	;#0x0204
+    fcf8:	bc 01 
+    ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
+    fcfa:	b2 d0 03 00 	bis	#3,	&0x01b0	;#0x0003
+    fcfe:	b0 01 
+	
+	//lower level way
+	//__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
+	
+	//use this simpler-ish way:
+	_BIS_SR(LPM0_bits + GIE);       // Enter LPM0 and enable interrupts
+    fd00:	32 d0 18 00 	bis	#24,	r2	;#0x0018
+	//or just simply to this:
+	//LPM0; //actually doesn't work b/c it doesn't have the interrupt enable
+										// " + GIE"
+										//it is _BIS_SR(LPM0_bits); only
+	//__delay_cycles(100);
+	a0_val = analog_vals[1];
+    fd04:	92 42 06 02 	mov	&0x0206,&0x0200	
+    fd08:	00 02 
+	a1_val = analog_vals[0];
+    fd0a:	92 42 04 02 	mov	&0x0204,&0x0202	
+    fd0e:	02 02 
+	
+}
+    fd10:	30 41       	ret			
+
+0000fd12 <ADC10_ISR>:
+// ADC10 interrupt service routine
+__attribute__((interrupt(ADC10_VECTOR)))
+void ADC10_ISR(void){
+	//again lower level way
+	//__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
+	_BIC_SR_IRQ(LPM0_bits); //to follow convention
+    fd12:	b1 c0 10 00 	bic	#16,	0(r1)	;#0x0010, 0x0000(r1)
+    fd16:	00 00 
+	//or simply
+	//LPM0_EXIT;
+}
+    fd18:	00 13       	reti			
+
+0000fd1a <_unexpected_>:
+    fd1a:	00 13       	reti			
+
+Disassembly of section .vectors:
+
+0000ffe0 <__ivtbl_16>:
+    ffe0:	78 fc 78 fc 78 fc 78 fc 78 fc 12 fd 78 fc 78 fc     x.x.x.x.x...x.x.
+    fff0:	78 fc 78 fc 78 fc 78 fc 78 fc 78 fc 78 fc 00 fc     x.x.x.x.x.x.x...
