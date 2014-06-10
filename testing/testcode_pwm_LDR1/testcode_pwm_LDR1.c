@@ -41,7 +41,7 @@
 //volatile unsigned char move_direction=0;
 
 
-unsigned int analog_vals[2];
+unsigned int analog_vals[2]={0,0};
 unsigned int a0_val = 0;
 unsigned int a1_val = 0;
 
@@ -264,7 +264,7 @@ void ADC_read_vals(void){
 	
 	ADC10CTL0 &= ~ENC; //disable conversion
 	while (ADC10CTL1 & BUSY);               // Wait if ADC10 core is active
-	ADC10SA = (unsigned int)analog_vals;			// Copies data in ADC10SA to unsigned int adc array
+	ADC10SA = (unsigned int)&analog_vals[0];			// Copies data in ADC10SA to unsigned int adc array
     ADC10CTL0 |= ENC + ADC10SC;             // Sampling and conversion start
 	//original way, but a little less nice lookin'
 	//__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
