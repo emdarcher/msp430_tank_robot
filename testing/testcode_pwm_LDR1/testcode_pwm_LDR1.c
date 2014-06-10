@@ -109,7 +109,7 @@ void main(void) {
 	for(;;) {
 		
 		ADC_read_vals();
-		set_motor_speeds(analog_to_pwm(a0_val),analog_to_pwm(a1_val));
+		set_motor_speeds(analog_to_pwm(a1_val),analog_to_pwm(a0_val));
 		
 	}
 	
@@ -244,7 +244,7 @@ void TA_init(void) {
 
 void ADC_init(void){
 	
-	ADC10CTL1 = INCH_2 + CONSEQ_1;
+	ADC10CTL1 = INCH_1 + CONSEQ_1;
 	// ADC10CTL1 control register 1, channel 1 highest conversion channel
     //make sure INCH_X val is correct!!!!
 	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
