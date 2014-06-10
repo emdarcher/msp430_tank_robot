@@ -244,7 +244,8 @@ void TA_init(void) {
 void ADC_init(void){
 	
 	ADC10CTL1 = INCH_2 + CONSEQ_1;
-	// ADC10CTL1 control register 1, channel 2 highest conversion channel
+	// ADC10CTL1 control register 1, channel 1 highest conversion channel
+    //make sure INCH_X val is correct!!!!
 	// CONSEQ_1 conversion seq mode 3 repeat sequence of channels
 	ADC10CTL0 = ADC10SHT_1 + MSC + ADC10ON + ADC10IE + SREF_0;
 	// ADC10CTL0 control Register 0
