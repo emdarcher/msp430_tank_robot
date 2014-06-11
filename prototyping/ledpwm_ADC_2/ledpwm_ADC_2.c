@@ -1,6 +1,6 @@
 //main code
 //to test two ADC inputs and outputing corresponding PWM
-//to two LEDs
+//to two LEDs based on which one is greater and the difference ( probably ).
 //has some useful stuff from this site:
 // http://coder-tronics.com/msp430-adc-tutorial/
 
@@ -38,7 +38,11 @@ void ADC_read_vals(void);
 int analog_to_pwm(unsigned int analog);
 
 void set_pwms(void);
+void set_led_pwms(int pwm1, int pwm2);
 
+void process_vals(unsigned int val1, unsigned int val2);
+
+//main code
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
 	
@@ -77,7 +81,7 @@ void main(void) {
 		}*/
 		
 		ADC_read_vals();
-		set_pwms();
+		set_led_pwms();
 		//TACCR1 = 5;
 		
 	}
@@ -86,10 +90,25 @@ void main(void) {
 
 //	Functions
 
+void process_vals(unsigned int val1, unsigned int val2 ){
+     //processes vals to determine left or right brighter and diff.
+    //val1 will be the left and val2 right in this case
+    
+    
+            
+}
+
+void set_led_pwms(int pwm1, int pwm2){
+    //pwm1 goes to LED1 on TA0.2 and pwm2 goes to LED2 on TA0.1
+    TACCR1 = pwm2;
+    TACCR2 = pwm1;
+    
+}
+
 void set_pwms(void){
 	
-	TACCR1 = analog_to_pwm(a0_val); //switched these after fix
-	TACCR2 = analog_to_pwm(a1_val);	
+	//TACCR1 = analog_to_pwm(a0_val); //switched these after fix
+	//TACCR2 = analog_to_pwm(a1_val);	
 		//TACCR1 = a1_val;
         //TACCR2 = a0_val;
 }
