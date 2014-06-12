@@ -76,21 +76,11 @@ void main(void) {
 	
 	//infinite loop
 	for(;;) {
-		/*__delay_cycles(PWM_TOP*5);
-		TACCR1 += dir1;
-		TACCR2 += dir2;
-		if (TACCR1 == PWM_TOP){
-			dir1 = -1; //switch directions
-			dir2 = 1;
-		} else if (TACCR1 == 0){
-			dir1 = 1;
-			dir2 = -1;
-		}*/
 		
-		ADC_read_vals();
+		ADC_read_vals(); //read the vals from the ADC
 		
         process_vals(a0_val,a1_val); //process vals and send correct output
-		
+                                        //to the LEDs
 	}
 	//return 0; //should never reach this	
 }
