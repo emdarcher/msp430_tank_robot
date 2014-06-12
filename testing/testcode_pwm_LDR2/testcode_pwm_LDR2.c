@@ -1,7 +1,14 @@
 //main code
 //test code for pwm, LDRs, and motors on msp430 tank robot
-//the output from the LDRs adjusts the opposite motor's speed
-//so it turns, but not the best method though.
+//the output from the two LDR is compared to find which one is greater and 
+//the difference between their values.
+//The difference is then applied to a difference in pwms from a midpoint
+//to the motors, making it turn more intensly if the difference between
+//the light values is greater and vise versa.
+//
+//this method should be better because it works on the difference not the 
+//direct values, so it will work fine in a wide range of ambient light.
+//also seems more natural.
 
 //	Header Files
 
@@ -34,22 +41,23 @@
 
 //PWM stuff
 #define PWM_TOP 1000 //for PWM DIV so DCO/PWM_TOP
+#define FULL_PWM PWM_TOP
+#define MID_PWM (FULL_PWM/2)
 
 
 
 //	Global Variables
-//volatile unsigned int number_milliseconds=0;
-//volatile unsigned char move_direction=0;
-
 
 unsigned int analog_vals[2]={0,0};
 unsigned int a0_val = 0;
 unsigned int a1_val = 0;
+unsigned int pwm_vals_lr[2] = {0,0};
+
 
 const unsigned char motor_a_pins[] = {MOTOR_L_A, MOTOR_R_A};
 //const unsigned char motor_ab_pins[] = {MOTOR_L_AB, MOTOR_R_AB};
 
-int i; //for "for" loops
+//int i; //for "for" loops
 
 //	Function Prototypes/Definitions
 void go_forwards(int spd);
@@ -108,14 +116,49 @@ void main(void) {
 	//infinite loop
 	for(;;) {
 		
-		ADC_read_vals();
-		set_motor_speeds(analog_to_pwm(a1_val),analog_to_pwm(a0_val));
-		
+		ADC_read_vals(); //read ADC input values
+		process_vals(); //process values and set motor pwms accordingly
 	}
 	
 }
 
 //	Functions
+void process_vals(unsigned int val1, unsigned int val2 ){
+     //processes vals to determine left or right brighter and diff.
+    //val1 will be the left and val2 right in this case
+    
+    //unsigned int diff_vals;
+    
+    val1 = analog_to_pwm(val1);
+    val2 = analog_to_pwm(val2);
+    
+    if(val1 == val2) {
+        set_led_pwms(FULL_PWM,FULL_PWM);
+    }
+    else if(val1 > val2){
+        diff_to_pwms(0x00,(val1-val2));
+    }
+    else if(val1 < val2){
+        diff_to_pwms(0x01,(val2-val1));
+    }
+            
+}
+
+//takes a difference and side then outputs correctly to motors
+void diff_to_pwms(unsigned char side, unsigned int difference){
+    //side can be 0 or 1, left or right, respectively
+    
+    unsigned int half_diff = (difference/2);
+    //pwm_vals_lr[side] = MID_PWM + half_diff;
+    //pwm_vals_lr[!(side)] = MID_PWM - half_diff;
+    
+    //switched for opposite sides b/c it is turning to light with motors
+    pwm_vals_lr[side] = MID_PWM - half_diff;
+    pwm_vals_lr[!(side)] = MID_PWM + half_diff;
+          
+    set_motor_speeds(pwm_vals_lr[0],pwm_vals_lr[1]);
+    
+}
 
 void set_motor_speeds(int speed_left, int speed_right){
 	
@@ -132,10 +175,10 @@ void set_motor_speed(unsigned char lr, int speed){
 
 if(lr < 2){ //just check to make sure lr value is valid 0 or 1	
 	if ( speed > 0 ){
-		outspeed = PWM_TOP - speed;
+		outspeed = PWM_TOP - speed; //if positive then forward
 		P1OUT |= motor_a_pins[lr];
 	}
-	else if ( speed <= 0 ){
+	else if ( speed <= 0 ){  //if a negetive value then reverse
 		outspeed = abs(speed);
 		P1OUT &= ~(motor_a_pins[lr]);
 	}
@@ -218,8 +261,10 @@ void spin_right(int spd){
 }
 
 int analog_to_pwm(unsigned int analog){
-	
-	if( analog > 1000 ){
+	//to convert the analog 10 bit 0-1023
+    //to 0-1000, but just by subtracting 32 if over 1000 or PWM_TOP.
+    //not directly accurate, but close enough in this case and less math.
+	if( analog > PWM_TOP){
 		
 		return (analog - 23);
 		
