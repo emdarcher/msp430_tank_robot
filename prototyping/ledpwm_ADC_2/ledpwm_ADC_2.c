@@ -16,6 +16,8 @@
 #define ALL_LEDS (LED1 | LED2)
 
 #define PWM_TOP	1000	// Set PWM Frequency: DCO/PWM_TOP
+#define FULL_PWM PWM_TOP
+#define MID_PWM (FULL_PWM/2)
 
 //analog stuff
 #define A0 BIT0
@@ -27,6 +29,11 @@ unsigned int analog_vals[2] = {0,0};
 unsigned int a0_val = 0;
 unsigned int a1_val = 0;
 
+unsigned int pwm_vals_lr[2] = {0,0};
+//unsigned char led_ports_lr[2] = {LED1,LED2};
+
+
+int i; //for "for" loops
 //	Function Prototypes/Definitions
 
 void TA_init(void);
@@ -41,7 +48,7 @@ void set_pwms(void);
 void set_led_pwms(int pwm1, int pwm2);
 
 void process_vals(unsigned int val1, unsigned int val2);
-
+void diff_to_pwms(unsigned char side, unsigned int difference);
 //main code
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD; //disable watchdog
@@ -81,8 +88,8 @@ void main(void) {
 		}*/
 		
 		ADC_read_vals();
-		set_led_pwms();
-		//TACCR1 = 5;
+		
+        process_vals(a0_val,a1_val); //process vals and send correct output
 		
 	}
 	//return 0; //should never reach this	
@@ -94,8 +101,34 @@ void process_vals(unsigned int val1, unsigned int val2 ){
      //processes vals to determine left or right brighter and diff.
     //val1 will be the left and val2 right in this case
     
+    //unsigned int diff_vals;
     
+    val1 = analog_to_pwm(val1);
+    val2 = analog_to_pwm(val2);
+    
+    if(val1 == val2) {
+        set_led_pwms(FULL_PWM,FULL_PWM);
+    }
+    else if(val1 > val2){
+        //diff_vals = val1-val2; //difference
+        diff_to_pwms(0,(val1-val2));
+    }
+    else if(val1 < val2){
+        //diff_vals = val2-val1; //difference
+        diff_to_pwms(1,(val2-val1));
+    }
             
+}
+
+void diff_to_pwms(unsigned char side, unsigned int difference){
+    //side can be 0 or 1, left or right, respectively
+    
+    unsigned int half_diff = (difference/2);
+    pwm_vals_lr[side] = MID_PWM + half_diff;
+    pwm_vals_lr[(~side)] = MID_PWM - half_diff;
+    
+    set_led_pwms(pwm_vals_lr[0],pwm_vals_lr[1]);
+    
 }
 
 void set_led_pwms(int pwm1, int pwm2){
@@ -115,7 +148,7 @@ void set_pwms(void){
 
 int analog_to_pwm(unsigned int analog){
 	
-	if( analog > 1000 ){
+	if( analog > PWM_TOP ){
 		return (analog - 23);
 	} else {
 		return analog;
