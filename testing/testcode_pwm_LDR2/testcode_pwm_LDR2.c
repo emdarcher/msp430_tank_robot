@@ -84,6 +84,9 @@ void ADC_read_vals(void);
 
 int analog_to_pwm(unsigned int analog);
 
+void diff_to_pwms(unsigned char side, unsigned int difference);
+void process_vals(unsigned int val1, unsigned int val2 );
+
 void bad_delay_ms(unsigned int ms){
 	int j;
 	for (j=0;j<ms;j++){
@@ -117,7 +120,7 @@ void main(void) {
 	for(;;) {
 		
 		ADC_read_vals(); //read ADC input values
-		process_vals(); //process values and set motor pwms accordingly
+		process_vals(a0_val,a1_val); //process values and set motor pwms accordingly
 	}
 	
 }
@@ -133,7 +136,7 @@ void process_vals(unsigned int val1, unsigned int val2 ){
     val2 = analog_to_pwm(val2);
     
     if(val1 == val2) {
-        set_led_pwms(FULL_PWM,FULL_PWM);
+        set_motor_speeds(FULL_PWM,FULL_PWM);
     }
     else if(val1 > val2){
         diff_to_pwms(0x00,(val1-val2));
