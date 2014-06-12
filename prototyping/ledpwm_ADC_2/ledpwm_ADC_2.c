@@ -111,11 +111,11 @@ void process_vals(unsigned int val1, unsigned int val2 ){
     }
     else if(val1 > val2){
         //diff_vals = val1-val2; //difference
-        diff_to_pwms(0,(val1-val2));
+        diff_to_pwms(0x00,(val1-val2));
     }
     else if(val1 < val2){
         //diff_vals = val2-val1; //difference
-        diff_to_pwms(1,(val2-val1));
+        diff_to_pwms(0x01,(val2-val1));
     }
             
 }
@@ -125,8 +125,15 @@ void diff_to_pwms(unsigned char side, unsigned int difference){
     
     unsigned int half_diff = (difference/2);
     pwm_vals_lr[side] = MID_PWM + half_diff;
-    pwm_vals_lr[(~side)] = MID_PWM - half_diff;
-    
+    pwm_vals_lr[!(side)] = MID_PWM - half_diff;
+    /*switch (side){
+        case 0:
+            pwm_vals_lr[1] = MID_PWM - half_diff;
+            break;
+        case 1:
+            pwm_vals_lr[0] = MID_PWM - half_diff;
+            break;
+    } */       
     set_led_pwms(pwm_vals_lr[0],pwm_vals_lr[1]);
     
 }
