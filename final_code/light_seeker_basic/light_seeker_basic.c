@@ -208,7 +208,7 @@ void TA_init(void) {
 	//stuff for TA0.2
 	TACCR2 = 0; //0.0%
 	TACCTL2 = OUTMOD_7; //same as above but for TACCR2
-	
+    
 }
 
 void ADC_init(void){
