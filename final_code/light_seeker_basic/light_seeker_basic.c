@@ -188,7 +188,7 @@ if(lr < 2){ //just check to make sure lr value is valid 0 or 1
 
 int analog_to_pwm(unsigned int analog){
 	//to convert the analog 10 bit 0-1023
-    //to 0-1000, but just by subtracting 32 if over 1000 or PWM_TOP.
+    //to 0-1000, but just by subtracting 23 if over 1000 or PWM_TOP.
     //not directly accurate, but close enough in this case and less math.
 	if( analog > PWM_TOP){
 		return (analog - 23);
